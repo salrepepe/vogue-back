@@ -10,7 +10,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://vogue-front.vercel.app/"],
   }),
 );
 app.use(compression());

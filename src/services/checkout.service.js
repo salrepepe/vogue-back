@@ -1,55 +1,71 @@
 const prisma = require("../../prisma/client");
-const { sendTelegramMessage } = require("./telegram.service");
+const { sendOrderToTelegram } = require("./telegram.service");
 
-async function checkout(sessionId) {
-  const cart = await prisma.cart.findFirst({
-    where: { sessionId },
+async function createOrder({ sessionId, name, phone, address }) {
+  const cart = await prisma.cart.findUnique({
+    where: {
+      sessionId,
+    },
+
     include: {
       items: {
-        include: { product: true },
+        include: {
+          product: true,
+          variant: true,
+        },
       },
     },
   });
 
   if (!cart || cart.items.length === 0) {
-    throw new Error("Cart is empty");
+    throw new Error("Cart empty");
   }
 
-  const total = cart.items.reduce((sum, item) => {
-    return sum + item.product.price * item.quantity;
-  }, 0);
+  const total = cart.items.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0,
+  );
 
   const order = await prisma.order.create({
     data: {
-      sessionId,
+      name,
+      phone,
+      address,
       total,
+
       items: {
         create: cart.items.map((item) => ({
           productId: item.productId,
+          variantId: item.variantId,
           quantity: item.quantity,
           price: item.product.price,
         })),
       },
     },
-    include: { items: true },
+
+    include: {
+      items: {
+        include: {
+          product: true,
+          variant: true,
+        },
+      },
+    },
   });
+
+  console.log(JSON.stringify(order, null, 2));
 
   await prisma.cartItem.deleteMany({
-    where: { cartId: cart.id },
+    where: {
+      cartId: cart.id,
+    },
   });
 
-  let text = `🛒 <b>НОВЫЙ ЗАКАЗ</b>\n\n`;
-
-  cart.items.forEach((item) => {
-    text += `• ${item.product.name} x${item.quantity} = $${item.product.price * item.quantity}\n`;
-  });
-
-  text += `\n💰 <b>ИТОГО:</b> $${total}`;
-  text += `\n🆔 Session: ${sessionId}`;
-
-  await sendTelegramMessage(text);
+  await sendOrderToTelegram(order);
 
   return order;
 }
 
-module.exports = { checkout };
+module.exports = {
+  createOrder,
+};

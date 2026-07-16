@@ -1,53 +1,21 @@
 const router = require("express").Router();
-const prisma = require("../../prisma/client");
 
-// добавить в корзину
-router.post("/", async (req, res) => {
-  try {
-    const { sessionId, productId, quantity } = req.body;
+const {
+  getCart,
+  addToCart,
+  updateItem,
+  removeItem,
+  clear,
+} = require("../controllers/cart.controller");
 
-    let cart = await prisma.cart.findFirst({
-      where: { sessionId },
-    });
+router.get("/", getCart);
 
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { sessionId },
-      });
-    }
+router.post("/", addToCart);
 
-    const item = await prisma.cartItem.create({
-      data: {
-        cartId: cart.id,
-        productId,
-        quantity,
-      },
-    });
+router.patch("/:itemId", updateItem);
 
-    res.json(item);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.delete("/:itemId", removeItem);
 
-// получить корзину
-router.get("/:sessionId", async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-
-    const cart = await prisma.cart.findFirst({
-      where: { sessionId },
-      include: {
-        items: {
-          include: { product: true },
-        },
-      },
-    });
-
-    res.json(cart);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.delete("/", clear);
 
 module.exports = router;
