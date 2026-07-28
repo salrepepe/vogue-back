@@ -50,7 +50,47 @@ ${order.total}$
     },
   );
 }
+async function sendStatusToTelegram(order) {
+  const statusNames = {
+    NEW: "🆕 Новый",
+
+    PROCESSING: "⚙️ В обработке",
+
+    SHIPPED: "🚚 Отправлен",
+
+    COMPLETED: "✅ Завершен",
+
+    CANCELLED: "❌ Отменен",
+  };
+
+  const text = `
+
+📦 ОБНОВЛЕНИЕ ЗАКАЗА
+
+Номер:
+#${order.id.slice(-6)}
+
+👤 Клиент:
+${order.name}
+
+
+Статус:
+
+${statusNames[order.status]}
+
+
+💰 Сумма:
+${order.total}$
+
+`;
+
+  await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    chat_id: CHAT_ID,
+    text,
+  });
+}
 
 module.exports = {
   sendOrderToTelegram,
+  sendStatusToTelegram,
 };

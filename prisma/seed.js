@@ -1,65 +1,171 @@
-const prisma = require("./client");
-
-const { seedBrands } = require("./seeds/brands.seed");
-const { seedCategories } = require("./seeds/categories.seed");
-const { seedProducts } = require("./seeds/products.seed");
-
+const prisma = require("../prisma/client");
 
 async function main() {
+  console.log("🌱 Seeding...");
 
-  console.log("🌱 DATABASE SEED START");
+  // BRANDS
 
+  const nike = await prisma.brand.create({
+    data: {
+      name: "Nike",
+      slug: "nike",
+    },
+  });
 
-  // 1. Очистка данных
-  console.log("🧹 Cleaning database...");
+  const adidas = await prisma.brand.create({
+    data: {
+      name: "Adidas",
+      slug: "adidas",
+    },
+  });
 
-  // await prisma.productVariant.deleteMany();
-  // await prisma.product.deleteMany();
-  // await prisma.category.deleteMany();
-  // await prisma.brand.deleteMany();
+  const gucci = await prisma.brand.create({
+    data: {
+      name: "Gucci",
+      slug: "gucci",
+    },
+  });
 
+  // CATEGORY
 
-  console.log("✅ Database cleaned");
+  const men = await prisma.category.create({
+    data: {
+      name: "Men",
+      slug: "men",
+      fullPath: "men",
+    },
+  });
 
+  const shoes = await prisma.category.create({
+    data: {
+      name: "Shoes",
+      slug: "shoes",
+      fullPath: "men/shoes",
+      parentId: men.id,
+    },
+  });
 
+  const sneakers = await prisma.category.create({
+    data: {
+      name: "Sneakers",
+      slug: "sneakers",
+      fullPath: "men/shoes/sneakers",
+      parentId: shoes.id,
+    },
+  });
 
-  // 2. Brands
+  // PRODUCTS
 
-  await seedBrands();
+  const product1 = await prisma.product.create({
+    data: {
+      name: "Nike Air Max",
 
+      slug: "nike-air-max",
 
+      price: 180,
 
-  // 3. Categories
+      images: ["https://example.com/nike.jpg"],
 
-  await seedCategories();
+      brandId: nike.id,
 
+      categoryId: shoes.id,
+    },
+  });
 
+  const product2 = await prisma.product.create({
+    data: {
+      name: "Gucci Sneakers",
 
-  // 4. Products
+      slug: "gucci-sneakers",
 
-  await seedProducts();
+      price: 650,
 
+      images: ["https://example.com/gucci.jpg"],
 
+      brandId: gucci.id,
 
-  console.log("🔥 DATABASE SEED COMPLETE");
+      categoryId: shoes.id,
+    },
+  });
 
+  // VARIANTS
+
+  await prisma.productVariant.create({
+    data: {
+      productId: product1.id,
+
+      size: "42",
+
+      color: "Black",
+    },
+  });
+
+  await prisma.productVariant.create({
+    data: {
+      productId: product1.id,
+
+      size: "43",
+
+      color: "White",
+    },
+  });
+
+  await prisma.productVariant.create({
+    data: {
+      productId: product2.id,
+
+      size: "41",
+
+      color: "Green",
+    },
+  });
+
+  // ORDER TEST
+
+  await prisma.order.create({
+    data: {
+      name: "Muhammed",
+
+      phone: "+996555000000",
+
+      address: "Bishkek",
+
+      total: 830,
+
+      status: "NEW",
+
+      items: {
+        create: [
+          {
+            productId: product1.id,
+
+            quantity: 1,
+
+            price: 180,
+          },
+
+          {
+            productId: product2.id,
+
+            quantity: 1,
+
+            price: 650,
+          },
+        ],
+      },
+    },
+  });
+
+  console.log("✅ Seed completed");
 }
 
-
-
 main()
-  .catch((error) => {
-
-    console.error(
-      "❌ SEED ERROR:",
-      error
-    );
+  .catch((e) => {
+    console.error(e);
 
     process.exit(1);
-
   })
+
   .finally(async () => {
-
     await prisma.$disconnect();
-
   });

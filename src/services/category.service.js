@@ -1,45 +1,112 @@
 const prisma = require("../../prisma/client");
-const buildCategoryTree = require("../utils/buildCategoryTree");
+const slugify = require("slugify");
 
-/**
- * Получить дерево категорий (для меню)
- */
 async function getCategoryTree() {
   const categories = await prisma.category.findMany({
-    orderBy: { sortOrder: "asc" },
+    where: {
+      parentId: null,
+    },
+
+    include: {
+      children: {
+        include: {
+          children: true,
+        },
+      },
+    },
+
+    orderBy: {
+      sortOrder: "asc",
+    },
   });
 
-  return buildCategoryTree(categories);
+  return categories;
 }
 
-/**
- * Резолв категории по fullPath
- * /men/shoes/sneakers
- */
 async function resolveCategoryByPath(path) {
-  const normalized = `/${path}`.replace(/\/+/g, "/");
-
   return prisma.category.findUnique({
-    where: { fullPath: normalized },
+    where: {
+      fullPath: path,
+    },
+
+    include: {
+      children: true,
+    },
+  });
+}
+async function getAllCategories() {
+  return prisma.category.findMany({
+    orderBy: {
+      sortOrder: "asc",
+    },
+
+    select: {
+      id: true,
+      name: true,
+      fullPath: true,
+      parentId: true,
+    },
   });
 }
 
-/**
- * Получить все дочерние категории (включая себя)
- */
-async function getCategorySubtreeIds(categoryId) {
-  const all = await prisma.category.findMany();
+async function createCategory(data) {
+  const { name, parentId } = data;
 
-  const collect = (id) => {
-    const children = all.filter((c) => c.parentId === id);
-    return children.flatMap((c) => [c.id, ...collect(c.id)]);
-  };
+  const slug = slugify(name, {
+    lower: true,
+    strict: true,
+    locale: "ru",
+  });
 
-  return [categoryId, ...collect(categoryId)];
+  let fullPath = slug;
+
+  if (parentId) {
+    const parent = await prisma.category.findUnique({
+      where: {
+        id: parentId,
+      },
+    });
+
+    if (!parent) {
+      throw new Error("Parent category not found");
+    }
+
+    fullPath = `${parent.fullPath}/${slug}`;
+  }
+
+  console.log({
+    name,
+    slug,
+    parentId,
+    fullPath,
+  });
+
+  return prisma.category.create({
+    data: {
+      name,
+
+      slug,
+
+      fullPath,
+
+      parentId: parentId || null,
+    },
+  });
+}
+
+async function deleteCategory(id) {
+  return prisma.category.delete({
+    where: {
+      id,
+    },
+  });
 }
 
 module.exports = {
   getCategoryTree,
   resolveCategoryByPath,
-  getCategorySubtreeIds,
+
+  getAllCategories,
+  createCategory,
+  deleteCategory,
 };

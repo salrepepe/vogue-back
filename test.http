@@ -1,26 +1,7 @@
-### Добавить товар
-POST http://localhost:5500/api/cart
+POST http://localhost:5500/api/auth/login
 Content-Type: application/json
-x-cart-session: test-user-123
 
 {
-  "productId": "ТВОЙ_PRODUCT_ID",
-  "variantId": "ТВОЙ_VARIANT_ID",
-  "quantity": 2
-}
-
-### Получить корзину
-GET http://localhost:5500/api/cart
-x-cart-session: 5dfe57b4-d8d6-4ecf-a136-c22cc9d03793
-
-### Создать заказ
-
-POST http://localhost:5500/api/checkout
-Content-Type: application/json
-x-cart-session: 5dfe57b4-d8d6-4ecf-a136-c22cc9d03793
-
-{
-  "name": "Muhammed",
-  "phone": "+996555000000",
-  "address": "Bishkek"
+    "login": "admin",
+    "password": "vogue2026"
 }

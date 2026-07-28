@@ -95,9 +95,10 @@ model Brand {
   name String
   slug String @unique
 
-  products Product[]
-
   logo String?
+  banner String?
+
+  products Product[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -135,17 +136,28 @@ model CartItem {
 }
 
 model Order {
+
   id String @id @default(cuid())
 
-  name    String
-  phone   String
+  name String
+  phone String
   address String?
 
   total Float
 
+  status OrderStatus @default(NEW)
+
   items OrderItem[]
 
   createdAt DateTime @default(now())
+}
+
+
+enum OrderStatus {
+  NEW
+  PROCESSING
+  COMPLETED
+  CANCELLED
 }
 
 model OrderItem {
