@@ -4,20 +4,31 @@ const slugify = require("slugify");
 async function getCategories(req, res) {
   try {
     const categories = await prisma.category.findMany({
-      where: {
-        parentId: null,
-      },
-
-      include: {
-        children: true,
-      },
-
       orderBy: {
         sortOrder: "asc",
       },
     });
 
-    res.json(categories);
+    const map = {};
+
+    categories.forEach((category) => {
+      map[category.id] = {
+        ...category,
+        children: [],
+      };
+    });
+
+    const tree = [];
+
+    categories.forEach((category) => {
+      if (category.parentId) {
+        map[category.parentId]?.children.push(map[category.id]);
+      } else {
+        tree.push(map[category.id]);
+      }
+    });
+
+    res.json(tree);
   } catch (error) {
     res.status(500).json({
       message: error.message,

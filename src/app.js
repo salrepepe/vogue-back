@@ -7,12 +7,15 @@ const path = require("path");
 
 const productRoutes = require("./routes/product.routes");
 const categoryRoutes = require("./routes/category.routes");
+
 const brandRoutes = require("./routes/brand.routes");
 const authRoutes = require("./routes/auth.routes");
 const uploadRoutes = require("./routes/upload.routes");
 
 const adminBrandRoutes = require("./routes/admin.brand.routes.js");
-const adminCategoryRoutes = require("./routes/admin.category.routes.js");
+const adminCategoryRoutes = require("./routes/admin.category.routes");
+
+const adminColorRoutes = require("./routes/admin.color.routes");
 
 const app = express();
 
@@ -55,6 +58,10 @@ app.use("/api/admin/categories", adminCategoryRoutes);
 
 app.use("/api/admin/upload", uploadRoutes);
 
+app.use("/api/admin/sizes", require("./routes/admin.size.routes"));
+
+app.use("/api/admin/colors", adminColorRoutes);
+
 // ===== AUTH =====
 
 app.use("/api/auth", authRoutes);
@@ -64,6 +71,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 
 app.use("/api/checkout", require("./routes/checkout.routes"));
+
 
 app.use("/api/cart", require("./routes/cart.routes"));
 

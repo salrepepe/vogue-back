@@ -37,10 +37,14 @@ async function getCart(sessionId) {
           brand: true,
         },
       },
+
       variant: true,
+
+      size: true,
+
+      color: true,
     },
   });
-
   const total = items.reduce((sum, item) => {
     return sum + item.product.price * item.quantity;
   }, 0);
@@ -59,7 +63,14 @@ async function getCart(sessionId) {
 /**
  * Добавить товар в корзину
  */
-async function addToCart({ sessionId, productId, variantId, quantity = 1 }) {
+async function addToCart({
+  sessionId,
+  productId,
+  variantId,
+  sizeId,
+  colorId,
+  quantity = 1,
+}) {
   const cart = await getOrCreateCart(sessionId);
 
   const existing = await prisma.cartItem.findFirst({
@@ -67,6 +78,8 @@ async function addToCart({ sessionId, productId, variantId, quantity = 1 }) {
       cartId: cart.id,
       productId,
       variantId,
+      sizeId,
+      colorId,
     },
   });
 
@@ -86,6 +99,8 @@ async function addToCart({ sessionId, productId, variantId, quantity = 1 }) {
       cartId: cart.id,
       productId,
       variantId,
+      sizeId,
+      colorId,
       quantity,
     },
   });

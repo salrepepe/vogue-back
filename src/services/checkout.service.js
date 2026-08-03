@@ -37,6 +37,10 @@ async function createOrder({ sessionId, name, phone, address }) {
         create: cart.items.map((item) => ({
           productId: item.productId,
           variantId: item.variantId,
+
+          sizeId: item.sizeId,
+          colorId: item.colorId,
+
           quantity: item.quantity,
           price: item.product.price,
         })),
@@ -48,6 +52,8 @@ async function createOrder({ sessionId, name, phone, address }) {
         include: {
           product: true,
           variant: true,
+          size: true,
+          color: true,
         },
       },
     },
@@ -65,7 +71,63 @@ async function createOrder({ sessionId, name, phone, address }) {
 
   return order;
 }
+async function createDirectOrder({
+  productId,
+  sizeId,
+  colorId,
+  quantity,
+  name,
+  phone,
+  address,
+}) {
+  const product = await prisma.product.findUnique({
+    where: {
+      id: productId,
+    },
+  });
+
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  const order = await prisma.order.create({
+    data: {
+      name,
+      phone,
+      address,
+
+      total: product.price * quantity,
+
+      items: {
+        create: {
+          productId: product.id,
+
+          sizeId,
+          colorId,
+
+          quantity,
+          price: product.price,
+        },
+      },
+    },
+
+    include: {
+      items: {
+        include: {
+          product: true,
+          size: true,
+          color: true,
+        },
+      },
+    },
+  });
+
+  await sendOrderToTelegram(order);
+
+  return order;
+}
 
 module.exports = {
   createOrder,
+  createDirectOrder,
 };

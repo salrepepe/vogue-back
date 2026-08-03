@@ -20,6 +20,23 @@ async function checkout(req, res) {
   }
 }
 
+async function directCheckout(req, res) {
+  try {
+    const order = await checkoutService.createDirectOrder({
+      ...req.body,
+    });
+
+    res.json(order);
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      message: error.message,
+    });
+  }
+}
+
 module.exports = {
   checkout,
+  directCheckout,
 };

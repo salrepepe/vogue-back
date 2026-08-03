@@ -11,6 +11,8 @@ async function getOrders(req, res) {
           include: {
             product: true,
             variant: true,
+            size: true,
+            color: true,
           },
         },
       },
@@ -38,6 +40,8 @@ async function getOrderById(req, res) {
           include: {
             product: true,
             variant: true,
+            size: true,
+            color: true,
           },
         },
       },

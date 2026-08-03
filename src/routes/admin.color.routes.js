@@ -1,15 +1,16 @@
 const router = require("express").Router();
 
 const authMiddleware = require("../middleware/auth.middleware");
-const categoryService = require("../services/category.service");
+
+const colorService = require("../services/color.service");
 
 router.use(authMiddleware);
 
 router.get("/", async (req, res) => {
   try {
-    const categories = await categoryService.getAllCategories();
+    const colors = await colorService.getColors();
 
-    res.json(categories);
+    res.json(colors);
   } catch (e) {
     res.status(500).json({
       error: e.message,
@@ -19,9 +20,9 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const category = await categoryService.createCategory(req.body);
+    const color = await colorService.createColor(req.body);
 
-    res.json(category);
+    res.json(color);
   } catch (e) {
     res.status(500).json({
       error: e.message,
@@ -31,7 +32,7 @@ router.post("/", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    await categoryService.deleteCategory(req.params.id);
+    await colorService.deleteColor(req.params.id);
 
     res.json({
       success: true,

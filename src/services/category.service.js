@@ -102,11 +102,36 @@ async function deleteCategory(id) {
   });
 }
 
+async function getCategorySubtreeIds(categoryId) {
+  const category = await prisma.category.findUnique({
+    where: {
+      id: categoryId,
+    },
+    include: {
+      children: true,
+    },
+  });
+
+  if (!category) {
+    return [];
+  }
+
+  let ids = [category.id];
+
+  for (const child of category.children) {
+    const childIds = await getCategorySubtreeIds(child.id);
+
+    ids.push(...childIds);
+  }
+
+  return ids;
+}
+
 module.exports = {
   getCategoryTree,
   resolveCategoryByPath,
-
   getAllCategories,
   createCategory,
   deleteCategory,
+  getCategorySubtreeIds,
 };

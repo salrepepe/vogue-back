@@ -28,8 +28,16 @@ async function getAdminProducts(req, res) {
 
 async function createProduct(req, res) {
   try {
-    const { name, description, price, images, brandId, categoryId, variants } =
-      req.body;
+    const {
+      name,
+      description,
+      price,
+      images,
+      brandId,
+      categoryId,
+      sizes = [],
+      colors = [],
+    } = req.body;
 
     const slug = slugify(name, {
       lower: true,
@@ -45,7 +53,7 @@ async function createProduct(req, res) {
 
         description,
 
-        price,
+        price: Number(price),
 
         images,
 
@@ -53,16 +61,41 @@ async function createProduct(req, res) {
 
         categoryId,
 
-        variants: {
-          create: variants.map((item) => ({
-            size: item.size,
-            color: item.color,
+        sizes: {
+          create: sizes.map((sizeId) => ({
+            size: {
+              connect: {
+                id: sizeId,
+              },
+            },
+          })),
+        },
+
+        colors: {
+          create: colors.map((item) => ({
+            color: {
+              connect: {
+                id: item.colorId,
+              },
+            },
+
+            images: item.images || [],
           })),
         },
       },
 
       include: {
-        variants: true,
+        sizes: {
+          include: {
+            size: true,
+          },
+        },
+
+        colors: {
+          include: {
+            color: true,
+          },
+        },
       },
     });
 
@@ -75,7 +108,6 @@ async function createProduct(req, res) {
     });
   }
 }
-
 async function deleteProduct(req, res) {
   try {
     const product = await prisma.product.findUnique({

@@ -7,10 +7,10 @@ async function sendOrderToTelegram(order) {
 🛍 ${item.product?.name || "Без названия"}
 
 Размер:
-${item.variant?.size || "-"}
+${item.size?.name || item.variant?.size || "-"}
 
 Цвет:
-${item.variant?.color || "-"}
+${item.color?.name || item.variant?.color || "-"}
 
 Количество:
 ${item.quantity}

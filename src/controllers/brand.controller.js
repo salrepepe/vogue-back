@@ -18,6 +18,28 @@ async function getBrands(req, res) {
   }
 }
 
+async function getBrandById(req, res) {
+  try {
+    const brand = await prisma.brand.findUnique({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    if (!brand) {
+      return res.status(404).json({
+        message: "Brand not found",
+      });
+    }
+
+    res.json(brand);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+}
+
 async function createBrand(req, res) {
   try {
     const { name, logo, banner } = req.body;
@@ -98,4 +120,5 @@ module.exports = {
   getBrands,
   createBrand,
   deleteBrand,
+  getBrandById,
 };

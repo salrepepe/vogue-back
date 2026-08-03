@@ -1,34 +1,28 @@
 const prisma = require("../../prisma/client");
-const { resolveCategoryByPath, getCategorySubtreeIds } =
-  require("./category.service");
+const {
+  resolveCategoryByPath,
+  getCategorySubtreeIds,
+} = require("./category.service");
 
 /**
  * Получить товары каталога (Lamoda-style engine)
  */
 async function getProducts(query) {
- const {
-  path,
-  category,
-  brand,
-  page = 1,
-  limit = 20,
-  sort,
-  search,
-} = query;
+  const { path, category, brand, page = 1, limit = 20, sort, search } = query;
 
-console.time("1");
-await prisma.product.findMany({ take: 20 });
-console.timeEnd("1");
+  console.time("1");
+  await prisma.product.findMany({ take: 20 });
+  console.timeEnd("1");
 
-console.time("2");
-await prisma.product.findMany({ take: 20 });
-console.timeEnd("2");
+  console.time("2");
+  await prisma.product.findMany({ take: 20 });
+  console.timeEnd("2");
 
-console.time("3");
-await prisma.product.findMany({ take: 20 });
-console.timeEnd("3");
+  console.time("3");
+  await prisma.product.findMany({ take: 20 });
+  console.timeEnd("3");
 
-const categoryPath = path || category;
+  const categoryPath = path || category;
 
   const skip = (Number(page) - 1) * Number(limit);
 
@@ -37,13 +31,13 @@ const categoryPath = path || category;
   /**
    * 1. CATEGORY TREE FILTER (/men/shoes)
    */
- if (categoryPath) {
+  if (categoryPath) {
     const category = await resolveCategoryByPath(categoryPath);
 
     if (category) {
-        categoryIds = await getCategorySubtreeIds(category.id);
+      categoryIds = await getCategorySubtreeIds(category.id);
     }
-}
+  }
 
   /**
    * 2. WHERE BUILDER
@@ -74,8 +68,8 @@ const categoryPath = path || category;
     sort === "price_asc"
       ? { price: "asc" }
       : sort === "price_desc"
-      ? { price: "desc" }
-      : { createdAt: "desc" };
+        ? { price: "desc" }
+        : { createdAt: "desc" };
 
   /**
    * 4. QUERY
@@ -109,14 +103,39 @@ const categoryPath = path || category;
  * ONE PRODUCT
  */
 async function getProductById(id) {
-  return prisma.product.findUnique({
+  const product = await prisma.product.findUnique({
     where: { id },
+
     include: {
       category: true,
       brand: true,
+
       variants: true,
+
+      sizes: {
+        include: {
+          size: true,
+        },
+      },
+
+      colors: {
+        include: {
+          color: true,
+        },
+      },
     },
   });
+
+  return {
+    ...product,
+
+    sizes: product.sizes.map((item) => item.size),
+
+    colors: product.colors.map((item) => ({
+      ...item.color,
+      images: item.images,
+    })),
+  };
 }
 
 module.exports = {
