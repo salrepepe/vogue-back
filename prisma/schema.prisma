@@ -85,11 +85,26 @@ model Category {
 
   products Product[]
 
+  translations CategoryTranslation[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([parentId, slug])
   @@index([parentId])
+}
+
+model CategoryTranslation {
+  id String @id @default(cuid())
+
+  categoryId String
+  language String
+  name String
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, language])
+  @@index([categoryId])
 }
 
 model Brand {

@@ -1,16 +1,36 @@
 const prisma = require("../../prisma/client");
 const slugify = require("slugify");
 
-async function getCategoryTree() {
+async function getCategoryTree(language = "ru") {
   const categories = await prisma.category.findMany({
     where: {
       parentId: null,
     },
 
     include: {
+      translations: {
+        where: {
+          language,
+        },
+      },
+
       children: {
         include: {
-          children: true,
+          translations: {
+            where: {
+              language,
+            },
+          },
+
+          children: {
+            include: {
+              translations: {
+                where: {
+                  language,
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -20,7 +40,19 @@ async function getCategoryTree() {
     },
   });
 
-  return categories;
+  function translateCategory(category) {
+    return {
+      ...category,
+
+      name: category.translations[0]?.name || category.name,
+
+      translations: undefined,
+
+      children: category.children?.map(translateCategory) || [],
+    };
+  }
+
+  return categories.map(translateCategory);
 }
 
 async function resolveCategoryByPath(path) {

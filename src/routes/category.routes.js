@@ -4,7 +4,9 @@ const categoryService = require("../services/category.service");
 
 router.get("/tree", async (req, res) => {
   try {
-    const tree = await categoryService.getCategoryTree();
+    const language = req.query.lang || "ru";
+
+    const tree = await categoryService.getCategoryTree(language);
 
     res.json(tree);
   } catch (e) {
