@@ -1,3 +1,5 @@
+const prisma = require("../../prisma/client");
+
 const { sendStatusToTelegram } = require("../services/telegram.service");
 async function getOrders(req, res) {
   try {
