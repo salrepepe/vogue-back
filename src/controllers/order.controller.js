@@ -20,10 +20,11 @@ async function getOrders(req, res) {
 
     res.json(orders);
   } catch (error) {
-    console.error(error);
+    console.error("GET ORDERS ERROR:", error);
 
     res.status(500).json({
       message: "Cannot get orders",
+      error: error.message,
     });
   }
 }
