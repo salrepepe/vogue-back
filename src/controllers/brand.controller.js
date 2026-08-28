@@ -80,6 +80,55 @@ async function createBrand(req, res) {
   }
 }
 
+async function updateBrand(req, res) {
+  try {
+    const { id } = req.params;
+
+    const { name, logo, banner } = req.body;
+
+    const slug = slugify(name, {
+      lower: true,
+      strict: true,
+      locale: "ru",
+    });
+
+    const exists = await prisma.brand.findFirst({
+      where: {
+        slug,
+        NOT: {
+          id,
+        },
+      },
+    });
+
+    if (exists) {
+      return res.status(400).json({
+        message: "Бренд с таким названием уже существует",
+      });
+    }
+
+    const brand = await prisma.brand.update({
+      where: {
+        id,
+      },
+      data: {
+        name,
+        slug,
+        logo,
+        banner,
+      },
+    });
+
+    res.json(brand);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+}
+
 async function deleteBrand(req, res) {
   try {
     const brand = await prisma.brand.findUnique({
@@ -119,6 +168,8 @@ async function deleteBrand(req, res) {
 module.exports = {
   getBrands,
   createBrand,
+  updateBrand,
+
   deleteBrand,
   getBrandById,
 };

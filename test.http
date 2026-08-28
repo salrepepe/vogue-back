@@ -1,3 +1,6 @@
+PATCH http://localhost:5000/api/products/cmt6w7gp80001fe1sv4v0lyue
+Content-Type: application/json
 
-
-GET http://localhost:5500/api/categories/tree?lang=en
+{
+  "name": "Тестовый товар",
+}
