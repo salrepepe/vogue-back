@@ -21,7 +21,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://vogue-front.vercel.app"],
+    origin: ["http://localhost:5173", "https://www.vogueoriginals.com/"],
   }),
 );
 
@@ -71,7 +71,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 
 app.use("/api/checkout", require("./routes/checkout.routes"));
-
 
 app.use("/api/cart", require("./routes/cart.routes"));
 
