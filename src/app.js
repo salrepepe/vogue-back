@@ -21,7 +21,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://www.vogueoriginals.com/"],
+    origin: ["http://localhost:5173", "https://vogueoriginals.com"],
   }),
 );
 
